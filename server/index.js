@@ -1,36 +1,58 @@
-global.atob = require('atob');
-const path = require('path');
-const Farmbot = require('farmbot').Farmbot;
-require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') });
+#!/usr/bin/env node
 
-const TAKE_WEEDER_AND_PUT_BACK = 13728;
-const LED_BOX_TEST = 13729;
-const TAKE_WATERING_NOZZLE_AND_GIVE_WATER = 14126;
-const TAKE_SEEDER_AND_SUCK_SEED = 13812;
-const HOVER_ABOVE_SEEDER = 13813;
-const TAKE_SEEDER = 13814;
-const HOVER_ABOVE_SEED_BIN = 13815;
-const TAKE_SEED = 13816;
+const app = require('./app');
+const debug = require('debug')('api');
+const http = require('http');
 
-var API_TOKEN = process.env.API_TOKEN;
+const port = normalizePort(process.env.API_PORT || '3000');
+app.set('port', port);
 
-let bot = new Farmbot({ token: API_TOKEN });
+const server = http.createServer(app);
 
-bot.on('status', (e, name) => {
-  console.log('New status:', name, e.location_data.position);
-  if (e.informational_settings.locked) {
-    bot.emergencyUnlock();
-    console.log('UNLOCKING AUTOMATICALLY!');
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+function normalizePort(val) {
+  const port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
   }
-});
 
-bot
-  .connect()
-  .then(async function(bot) {
-    // return bot.emergencyUnlock();
-    return bot.execSequence(LED_BOX_TEST);
-    // return bot.moveRelative({ x: -100, y: 0, z: 0, speed: 100 });
-  })
-  .catch(e => {
-    console.log('ERROR', e);
-  });
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+function onListening() {
+  const addr = server.address();
+  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}

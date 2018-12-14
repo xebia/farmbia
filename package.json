@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "api": "nodemon $NODE_DEBUG_OPTION ./server",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
@@ -11,6 +12,7 @@
   "dependencies": {
     "atob": "2.1.2",
     "dotenv": "6.2.0",
+    "express": "4.16.4",
     "farmbot": "6.6.1",
     "vue": "^2.5.17"
   },
@@ -26,6 +28,7 @@
     "babel-jest": "^23.6.0",
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0-0",
+    "nodemon": "1.18.8",
     "vue-template-compiler": "^2.5.17"
   },
   "eslintConfig": {
@@ -37,7 +40,16 @@
       "plugin:vue/essential",
       "@vue/prettier"
     ],
-    "rules": {},
+    "rules": {
+      "no-console": ["off"],
+      "prettier/prettier": [
+        "warn",
+        {
+          "singleQuote": true,
+          "trailingComma": "es5"
+        }
+      ]
+    },
     "parserOptions": {
       "parser": "babel-eslint"
     }
