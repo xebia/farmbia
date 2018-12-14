@@ -5,7 +5,7 @@ require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const TAKE_WEEDER_AND_PUT_BACK = 13728;
 const LED_BOX_TEST = 13729;
-
+const TAKE_WATERING_NOZZLE_AND_GIVE_WATER = 14126;
 const TAKE_SEEDER_AND_SUCK_SEED = 13812;
 const HOVER_ABOVE_SEEDER = 13813;
 const TAKE_SEEDER = 13814;
