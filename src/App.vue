@@ -51,9 +51,7 @@
             <form class="ui form" @submit.prevent="executeSequence">
               <div class="ui action input">
                 <select name="executeSequence" id="executeSequence" v-model="seqId" class="ui dropdown">
-                  <option value="13729">DISCO!</option>
-                  <option value="13728">Take weeder and weed the plant</option>
-                  <option value="13812">Take seeder and suck seed</option>
+                  <option :value="s.id" v-for="s in sequences" :key="s.id">{{s.name}}</option>
                 </select>
                 <sui-button color="green">Execute</sui-button>
               </div>
@@ -102,6 +100,7 @@ export default {
       movementType: 'relative',
       peripherals: [],
       post,
+      sequences: [],
       seqId: 13812,
       toolId: undefined,
       tools: [],
@@ -131,6 +130,7 @@ export default {
   async mounted() {
     this.tools = await getFarmbot('/tools');
     this.peripherals = await getFarmbot('/peripherals');
+    this.sequences = await getFarmbot('/sequences');
     this.toolId = this.tools[0].id;
   },
 };
