@@ -68,6 +68,20 @@
                 <sui-button color="green">Pick up tool</sui-button>
               </div>
             </form>
+
+            <h2 is="sui-header">Peripherals</h2>
+            <form class="ui form">
+              <sui-grid columns="two" v-for="p in peripherals" :key="p.id">
+                <sui-grid-column>
+                  <sui-form-field>
+                    <sui-checkbox :label="p.label" toggle v-model="p.value" @change="writePin(p.pin, p.value)" />
+                  </sui-form-field>
+                </sui-grid-column>
+                <sui-grid-column>
+                  <sui-label>pin {{p.pin}}</sui-label>
+                </sui-grid-column>
+              </sui-grid>
+            </form>
           </sui-grid-column>
         </sui-grid>
       </sui-container>
@@ -83,17 +97,19 @@ const headers = {
   'Content-Type': 'application/json',
   Authorization: `Bearer ${TOKEN}`,
 };
+const json = res => res.json();
 
 export default {
   name: 'app',
   components: {},
   data() {
     return {
-      tools: [],
-      toolId: undefined,
       logo,
       movementType: 'relative',
+      peripherals: [],
       seqId: 13812,
+      toolId: undefined,
+      tools: [],
       x: 0,
       y: 0,
       z: 0,
@@ -133,15 +149,27 @@ export default {
     async goToTool() {
       const points = await fetch('https://my.farmbot.io/api/points', {
         headers,
-      }).then(res => res.json());
+      }).then(json);
       const { x, y, z } = points.find(p => p.tool_id === this.toolId);
       this.move(x, y, z, 'absolute');
+    },
+    writePin(pinId, value) {
+      fetch(`http://localhost:3000/pin/${pinId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          value,
+        }),
+      });
     },
   },
   async mounted() {
     this.tools = await fetch(`https://my.farmbot.io/api/tools`, {
       headers,
-    }).then(res => res.json());
+    }).then(json);
+    this.peripherals = await fetch(`https://my.farmbot.io/api/peripherals`, {
+      headers,
+    }).then(json);
     this.toolId = this.tools[0].id;
   },
 };

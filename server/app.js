@@ -20,6 +20,7 @@ app
   .post('/unlock', control.unlock)
   .post('/move/:type', control.move)
   .post('/sequence/execute/:id', control.executeSequence)
+  .post('/pin/:id', control.writePin)
   .get('*', function(req, res) {
     res.sendStatus(404);
   });

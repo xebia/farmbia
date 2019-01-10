@@ -10,11 +10,14 @@ var API_TOKEN = process.env.API_TOKEN;
 let bot = new Farmbot({ token: API_TOKEN });
 
 bot.on('status', e => {
-  //console.log('New status:', name, e.location_data.position);
+  // console.log('New status:', e.pins['7']);
   if (e.informational_settings.locked) {
     // bot.emergencyUnlock();
     // console.log('UNLOCKING AUTOMATICALLY!');
   }
+});
+bot.on('logs', e => {
+  // console.log('LOG:', e);
 });
 
 bot
@@ -51,9 +54,18 @@ module.exports = {
     }
     res.sendStatus(200);
   },
+  writePin: async (req, res) => {
+    console.log(`Writing pin ${req.params.id} => ${req.body.value}`);
+    await bot.writePin({
+      pin_number: req.params.id,
+      pin_value: req.body.value ? 1 : 0,
+      pin_mode: 0
+    });
+    res.sendStatus(200);
+  },
   executeSequence: (req, res) => {
     console.log('Executing sequence', req.params.id);
     bot.execSequence(req.params.id);
     res.sendStatus(200);
-  },
+  }
 };
