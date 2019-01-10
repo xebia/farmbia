@@ -14,27 +14,8 @@
         <sui-grid columns="two">
           <sui-grid-column>
 
-            <sui-form @submit.prevent="move">
-              <sui-form-fields grouped>
-                <h2 is="sui-header">Manual movement</h2>
-                <label>Movement type</label>
-                <sui-form-field>
-                  <sui-checkbox
-                    label="Relative"
-                    radio
-                    value="relative"
-                    v-model="movementType"
-                  />
-                </sui-form-field>
-                <sui-form-field>
-                  <sui-checkbox
-                    label="Absolute"
-                    radio
-                    value="absolute"
-                    v-model="movementType"
-                  />
-                </sui-form-field>
-              </sui-form-fields>
+            <sui-form @submit.prevent="move(x, y, z, 'absolute')">
+              <h2 is="sui-header">Manual movement</h2>
 
               <sui-grid columns="three">
                 <sui-grid-column>
@@ -58,7 +39,8 @@
               </sui-grid>
 
               <p>
-                <sui-button color="green">Move</sui-button>
+                <sui-button color="green">Absolute</sui-button>
+                <sui-button @click.prevent="move(x, y, z, 'relative')">Relative</sui-button>
               </p>
             </sui-form>
 
@@ -76,6 +58,16 @@
                 <sui-button color="green">Execute</sui-button>
               </div>
             </form>
+
+            <h2 is="sui-header">Tools</h2>
+            <form class="ui form" @submit.prevent="goToTool">
+              <div class="ui action input">
+                <select name="executeSequence" id="goToTool" v-model="toolId" class="ui dropdown">
+                  <option v-for="tool in tools" :key="tool.id" :value="tool.id">{{tool.name}}</option>
+                </select>
+                <sui-button color="green">Pick up tool</sui-button>
+              </div>
+            </form>
           </sui-grid-column>
         </sui-grid>
       </sui-container>
@@ -86,11 +78,19 @@
 <script>
 import logo from './assets/favicon.svg';
 
+const TOKEN = undefined; // TODO: get token securely
+const headers = {
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${TOKEN}`,
+};
+
 export default {
   name: 'app',
   components: {},
   data() {
     return {
+      tools: [],
+      toolId: undefined,
       logo,
       movementType: 'relative',
       seqId: 13812,
@@ -111,10 +111,8 @@ export default {
         method: 'POST',
       });
     },
-    move() {
-      const { x, y, z } = this;
-
-      fetch(`http://localhost:3000/move/${this.movementType}`, {
+    move(x, y, z, movementType = 'relative') {
+      fetch(`http://localhost:3000/move/${movementType}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -132,6 +130,19 @@ export default {
         });
       }
     },
+    async goToTool() {
+      const points = await fetch('https://my.farmbot.io/api/points', {
+        headers,
+      }).then(res => res.json());
+      const { x, y, z } = points.find(p => p.tool_id === this.toolId);
+      this.move(x, y, z, 'absolute');
+    },
+  },
+  async mounted() {
+    this.tools = await fetch(`https://my.farmbot.io/api/tools`, {
+      headers,
+    }).then(res => res.json());
+    this.toolId = this.tools[0].id;
   },
 };
 </script>
