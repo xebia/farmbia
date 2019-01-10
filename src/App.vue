@@ -3,8 +3,8 @@
     <sui-segment emphasis="secondary" vertical>
       <sui-container>
         <h1 is="sui-header">FarmBia! <sui-image size="small" :src="logo" />
-          <button @click="unlock" class="ui right floated large yellow button">Unlock</button>
-          <button @click="stop" class="ui right floated large red button"><i class="bullhorn icon"></i> STOP!</button>
+          <button @click="post('/unlock')" class="ui right floated large yellow button">Unlock</button>
+          <button @click="post('/stop')" class="ui right floated large red button"><i class="bullhorn icon"></i> STOP!</button>
         </h1>
       </sui-container>
     </sui-segment>
@@ -91,13 +91,7 @@
 
 <script>
 import logo from './assets/favicon.svg';
-
-const TOKEN = undefined; // TODO: get token securely
-const headers = {
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${TOKEN}`,
-};
-const json = res => res.json();
+import { getFarmbot, post } from './http';
 
 export default {
   name: 'app',
@@ -107,6 +101,7 @@ export default {
       logo,
       movementType: 'relative',
       peripherals: [],
+      post,
       seqId: 13812,
       toolId: undefined,
       tools: [],
@@ -116,60 +111,26 @@ export default {
     };
   },
   methods: {
-    getSequences() {},
-    stop() {
-      fetch('http://localhost:3000/stop', {
-        method: 'POST',
-      });
-    },
-    unlock() {
-      fetch('http://localhost:3000/unlock', {
-        method: 'POST',
-      });
-    },
     move(x, y, z, movementType = 'relative') {
-      fetch(`http://localhost:3000/move/${movementType}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          x: +x,
-          y: +y,
-          z: +z,
-        }),
-      });
+      post(`/move/${movementType}`, { x: +x, y: +y, z: +z });
     },
     executeSequence() {
       if (this.seqId) {
-        fetch(`http://localhost:3000/sequence/execute/${this.seqId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
+        post(`/sequence/execute/${this.seqId}`);
       }
     },
     async goToTool() {
-      const points = await fetch('https://my.farmbot.io/api/points', {
-        headers,
-      }).then(json);
+      const points = await getFarmbot('/points');
       const { x, y, z } = points.find(p => p.tool_id === this.toolId);
       this.move(x, y, z, 'absolute');
     },
     writePin(pinId, value) {
-      fetch(`http://localhost:3000/pin/${pinId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          value,
-        }),
-      });
+      post(`/pin/${pinId}`, { value });
     },
   },
   async mounted() {
-    this.tools = await fetch(`https://my.farmbot.io/api/tools`, {
-      headers,
-    }).then(json);
-    this.peripherals = await fetch(`https://my.farmbot.io/api/peripherals`, {
-      headers,
-    }).then(json);
+    this.tools = await getFarmbot('/tools');
+    this.peripherals = await getFarmbot('/peripherals');
     this.toolId = this.tools[0].id;
   },
 };
