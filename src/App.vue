@@ -88,6 +88,7 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import logo from './assets/favicon.svg';
 import { getFarmbot, post } from './http';
 import SockJS from 'sockjs-client';
@@ -139,7 +140,10 @@ export default {
     sockjs.onopen = () => console.log('[*] open', sockjs.protocol);
     sockjs.onclose = () => console.log('[*] close');
     sockjs.onmessage = e => {
-      console.log(JSON.parse(e.data));
+      const data = JSON.parse(e.data);
+      this.peripherals.forEach(per => {
+        Vue.set(per, 'value', !!data.pins[per.pin].value);
+      });
     };
   },
 };

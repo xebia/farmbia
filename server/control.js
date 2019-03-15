@@ -18,7 +18,6 @@ module.exports = {
     Promise.all([sockProm, bot.connect()]).then(([sockConnection, bot]) => {
       console.log('Bot and sock connected');
       bot.on('status', e => {
-        console.log('STATUS', e);
         sockConnection.write(
           JSON.stringify({
             info: e.informational_settings,
