@@ -90,6 +90,7 @@
 <script>
 import logo from './assets/favicon.svg';
 import { getFarmbot, post } from './http';
+import SockJS from 'sockjs-client';
 
 export default {
   name: 'app',
@@ -132,6 +133,14 @@ export default {
     this.peripherals = await getFarmbot('/peripherals');
     this.sequences = await getFarmbot('/sequences');
     this.toolId = this.tools[0].id;
+
+    const sockjs = new SockJS('http://localhost:3000/updates');
+
+    sockjs.onopen = () => console.log('[*] open', sockjs.protocol);
+    sockjs.onclose = () => console.log('[*] close');
+    sockjs.onmessage = e => {
+      console.log(JSON.parse(e.data));
+    };
   },
 };
 </script>

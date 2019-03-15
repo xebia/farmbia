@@ -1,7 +1,6 @@
 global.atob = require('atob');
 const Farmbot = require('farmbot').Farmbot;
 const path = require('path');
-// const seq = require('./sequences');
 
 require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -9,29 +8,36 @@ var API_TOKEN = process.env.API_TOKEN;
 
 let bot = new Farmbot({ token: API_TOKEN });
 
-bot.on('status', e => {
-  // console.log('New status:', e.pins['7']);
-  if (e.informational_settings.locked) {
-    // bot.emergencyUnlock();
-    // console.log('UNLOCKING AUTOMATICALLY!');
-  }
-});
-bot.on('logs', e => {
-  // console.log('LOG:', e);
-});
-
-bot
-  .connect()
-  .then(async function() {
-    // return bot.emergencyUnlock();
-    // return bot.execSequence(seq.LED_BOX_TEST);
-    // return bot.moveRelative({ x: -100, y: 0, z: 0, speed: 100 });
-  })
-  .catch(e => {
-    console.log('ERROR', e);
-  });
-
 module.exports = {
+  register: sock => {
+    const sockProm = new Promise(resolve => {
+      sock.on('connection', sockConnection => {
+        return resolve(sockConnection);
+      });
+    });
+    Promise.all([sockProm, bot.connect()]).then(([sockConnection, bot]) => {
+      console.log('Bot and sock connected');
+      bot.on('status', e => {
+        console.log('STATUS', e.location_data.position);
+        sockConnection.write(
+          JSON.stringify({ position: e.location_data.position })
+        );
+
+        if (e.informational_settings.locked) {
+          // bot.emergencyUnlock();
+          // console.log('UNLOCKING AUTOMATICALLY!');
+        }
+      });
+
+      bot.on('logs', () => {
+        // console.log('LOG:', e);
+      });
+
+      // return bot.emergencyUnlock();
+      // return bot.execSequence(seq.LED_BOX_TEST);
+      // return bot.moveRelative({ x: -100, y: 0, z: 0, speed: 100 });
+    });
+  },
   stop: (req, res) => {
     console.log('Stop!');
     bot.emergencyLock();
