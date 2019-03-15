@@ -18,9 +18,13 @@ module.exports = {
     Promise.all([sockProm, bot.connect()]).then(([sockConnection, bot]) => {
       console.log('Bot and sock connected');
       bot.on('status', e => {
-        console.log('STATUS', e.location_data.position);
+        console.log('STATUS', e);
         sockConnection.write(
-          JSON.stringify({ position: e.location_data.position })
+          JSON.stringify({
+            info: e.informational_settings,
+            position: e.location_data.position,
+            pins: e.pins
+          })
         );
 
         if (e.informational_settings.locked) {
@@ -41,12 +45,12 @@ module.exports = {
   stop: (req, res) => {
     console.log('Stop!');
     bot.emergencyLock();
-    res.sendStatus(200);
+    res.status(200).json({});
   },
   unlock: (req, res) => {
     console.log('Unlock!');
     bot.emergencyUnlock();
-    res.sendStatus(200);
+    res.status(200).json({});
   },
   move: (req, res) => {
     const { x, y, z } = req.body;
@@ -58,7 +62,7 @@ module.exports = {
       console.log('Moving absolute', req.body);
       bot.moveAbsolute({ x, y, z });
     }
-    res.sendStatus(200);
+    res.status(200).json({});
   },
   writePin: async (req, res) => {
     console.log(`Writing pin ${req.params.id} => ${req.body.value}`);
@@ -67,11 +71,11 @@ module.exports = {
       pin_value: req.body.value ? 1 : 0,
       pin_mode: 0
     });
-    res.sendStatus(200);
+    res.status(200).json({});
   },
   executeSequence: (req, res) => {
     console.log('Executing sequence', req.params.id);
     bot.execSequence(req.params.id);
-    res.sendStatus(200);
+    res.status(200).json({});
   }
 };
