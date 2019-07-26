@@ -24,33 +24,33 @@
       <sui-container>
         <sui-grid columns="two">
           <sui-grid-column>
-            <sui-form @submit.prevent="move(x, y, z, 'absolute')">
+            <sui-form @submit.prevent="move(position.x, position.y, position.z, 'absolute')">
               <h2 is="sui-header">Manual movement</h2>
 
               <sui-grid columns="three">
                 <sui-grid-column>
                   <sui-form-field>
                     <label>X</label>
-                    <input type="number" v-model="x" placeholder="X" />
+                    <input type="number" step="0.01" v-model="position.x" placeholder="X" />
                   </sui-form-field>
                 </sui-grid-column>
                 <sui-grid-column>
                   <sui-form-field>
                     <label>Y</label>
-                    <input type="number" v-model="y" placeholder="Y" />
+                    <input type="number" step="0.01" v-model="position.y" placeholder="Y" />
                   </sui-form-field>
                 </sui-grid-column>
                 <sui-grid-column>
                   <sui-form-field>
                     <label>Z</label>
-                    <input type="number" v-model="z" placeholder="Z" />
+                    <input type="number" step="0.01" v-model="position.z" placeholder="Z" />
                   </sui-form-field>
                 </sui-grid-column>
               </sui-grid>
 
               <p>
                 <sui-button color="green">Absolute</sui-button>
-                <sui-button @click.prevent="move(x, y, z, 'relative')"
+                <sui-button @click.prevent="move(position.x, position.y, position.z, 'relative')"
                   >Relative</sui-button
                 >
               </p>
@@ -134,14 +134,16 @@ export default {
       logo,
       movementType: 'relative',
       peripherals: [],
+      position: {
+        x: undefined,
+        y: undefined,
+        z: undefined
+      },
       post,
       sequences: [],
       seqId: 13812,
       toolId: undefined,
-      tools: [],
-      x: 0,
-      y: 0,
-      z: 0,
+      tools: []
     };
   },
   methods: {
@@ -180,6 +182,18 @@ export default {
         this.peripherals.forEach(per => {
           Vue.set(per, 'value', !!data.pins[per.pin].value);
         });
+      }
+
+      if (data.position) {
+        if (this.position.x === undefined) {
+          this.position.x = data.position.x;
+        }
+        if (this.position.y === undefined) {
+          this.position.y = data.position.y;
+        }
+        if (this.position.z === undefined) {
+          this.position.z = data.position.z;
+        }
       }
     };
   },
