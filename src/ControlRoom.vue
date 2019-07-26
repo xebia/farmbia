@@ -4,13 +4,16 @@
       <sui-container>
         <h1 is="sui-header">
           FarmBia! <sui-image size="small" :src="logo" />
+          {{ info.locked }}
           <button
+            v-if="info.locked"
             @click="post('/unlock')"
             class="ui right floated large yellow button"
           >
             Unlock
           </button>
           <button
+            v-else
             @click="post('/stop')"
             class="ui right floated large red button"
           >
@@ -24,33 +27,55 @@
       <sui-container>
         <sui-grid columns="two">
           <sui-grid-column>
-            <sui-form @submit.prevent="move(position.x, position.y, position.z, 'absolute')">
+            <sui-form
+              @submit.prevent="
+                move(position.x, position.y, position.z, 'absolute')
+              "
+            >
               <h2 is="sui-header">Manual movement</h2>
 
               <sui-grid columns="three">
                 <sui-grid-column>
                   <sui-form-field>
                     <label>X</label>
-                    <input type="number" step="0.01" v-model="position.x" placeholder="X" />
+                    <input
+                      type="number"
+                      step="0.01"
+                      v-model="position.x"
+                      placeholder="X"
+                    />
                   </sui-form-field>
                 </sui-grid-column>
                 <sui-grid-column>
                   <sui-form-field>
                     <label>Y</label>
-                    <input type="number" step="0.01" v-model="position.y" placeholder="Y" />
+                    <input
+                      type="number"
+                      step="0.01"
+                      v-model="position.y"
+                      placeholder="Y"
+                    />
                   </sui-form-field>
                 </sui-grid-column>
                 <sui-grid-column>
                   <sui-form-field>
                     <label>Z</label>
-                    <input type="number" step="0.01" v-model="position.z" placeholder="Z" />
+                    <input
+                      type="number"
+                      step="0.01"
+                      v-model="position.z"
+                      placeholder="Z"
+                    />
                   </sui-form-field>
                 </sui-grid-column>
               </sui-grid>
 
               <p>
                 <sui-button color="green">Absolute</sui-button>
-                <sui-button @click.prevent="move(position.x, position.y, position.z, 'relative')"
+                <sui-button
+                  @click.prevent="
+                    move(position.x, position.y, position.z, 'relative')
+                  "
                   >Relative</sui-button
                 >
               </p>
@@ -131,19 +156,20 @@ export default {
   components: {},
   data() {
     return {
+      info: {},
       logo,
       movementType: 'relative',
       peripherals: [],
       position: {
         x: undefined,
         y: undefined,
-        z: undefined
+        z: undefined,
       },
       post,
       sequences: [],
       seqId: 13812,
       toolId: undefined,
-      tools: []
+      tools: [],
     };
   },
   methods: {
@@ -182,6 +208,10 @@ export default {
         this.peripherals.forEach(per => {
           Vue.set(per, 'value', !!data.pins[per.pin].value);
         });
+      }
+
+      if (data.info) {
+        this.info = data.info;
       }
 
       if (data.position) {
