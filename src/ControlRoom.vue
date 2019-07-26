@@ -174,9 +174,13 @@ export default {
     sockjs.onclose = () => console.log('[*] close');
     sockjs.onmessage = e => {
       const data = JSON.parse(e.data);
-      this.peripherals.forEach(per => {
-        Vue.set(per, 'value', !!data.pins[per.pin].value);
-      });
+      console.log(data);
+
+      if (data.pins) {
+        this.peripherals.forEach(per => {
+          Vue.set(per, 'value', !!data.pins[per.pin].value);
+        });
+      }
     };
   },
 };

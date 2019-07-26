@@ -30,7 +30,8 @@ module.exports = {
 
     Promise.all([sockProm, bot.connect()]).then(([sockConnection, bot]) => {
       console.log('Bot and sock connected');
-      bot.on('status', e => {
+      bot.on('legacy_status', e => {
+        // console.log('LEGACY STATUS', e);
         sockConnection.write(
           JSON.stringify({
             info: e.informational_settings,
@@ -45,8 +46,11 @@ module.exports = {
         }
       });
 
-      bot.on('logs', () => {
-        // console.log('LOG:', e);
+      bot.on('logs', log => {
+        // console.log('LOG', log);
+        sockConnection.write(JSON.stringify({
+          log
+        }))
       });
 
       // return bot.emergencyUnlock();
