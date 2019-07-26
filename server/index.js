@@ -1,14 +1,9 @@
 #!/usr/bin/env node
-
-const app = require('./app');
 const debug = require('debug')('api');
 const http = require('http');
-const sockjs = require('sockjs');
-const init = require('./init');
-
-const sock = sockjs.createServer({
-  sockjs_url: 'http://cdn.jsdelivr.net/sockjs/1.0.1/sockjs.min.js'
-});
+const app = require('./app');
+const control = require('./control');
+const sock = require('./sock');
 
 const port = normalizePort(process.env.API_PORT || '3000');
 app.set('port', port);
@@ -18,9 +13,8 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-init(sock);
-
-sock.installHandlers(server, { prefix: '/updates' });
+sock.init(server);
+control.initBot();
 
 function normalizePort(val) {
   const port = parseInt(val, 10);

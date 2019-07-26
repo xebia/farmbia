@@ -8,6 +8,7 @@
 <script>
 import ControlRoom from './ControlRoom';
 import LoginForm from './LoginForm';
+import { get } from './http';
 
 export default {
   components: {
@@ -23,6 +24,9 @@ export default {
     login(token) {
       this.token = token;
     },
+  },
+  async mounted() {
+    this.token = await get('/token');
   },
   name: 'App',
 };

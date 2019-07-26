@@ -1,20 +1,33 @@
 global.atob = require('atob');
 const Farmbot = require('farmbot').Farmbot;
 const path = require('path');
+const s = require('./sock');
 
-require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') });
-
-var API_TOKEN = process.env.API_TOKEN;
-
-let bot = new Farmbot({ token: API_TOKEN });
+let bot;
 
 module.exports = {
-  register: sock => {
-    const sockProm = new Promise(resolve => {
-      sock.on('connection', sockConnection => {
-        return resolve(sockConnection);
+  initBot(token) {
+    console.log(
+      `Trying to initialize bot with token from ${
+        token ? 'login' : 'environment variable'
+      }`
+    );
+
+    if (!token) {
+      require('dotenv').config({
+        path: path.resolve(process.cwd(), '.env.local')
       });
-    });
+      token = process.env.API_TOKEN;
+      if (!token) {
+        console.log(
+          'Could not auto login to FarmBot API. Please set API_TOKEN environment variable'
+        );
+        return;
+      }
+    }
+    bot = new Farmbot({ token });
+    const sockProm = s.get();
+
     Promise.all([sockProm, bot.connect()]).then(([sockConnection, bot]) => {
       console.log('Bot and sock connected');
       bot.on('status', e => {

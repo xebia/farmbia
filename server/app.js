@@ -18,6 +18,7 @@ app
     next();
   })
   .post('/login', auth.login)
+  .get('/token', auth.token)
   .post('/stop', control.stop)
   .post('/unlock', control.unlock)
   .post('/move/:type', control.move)
