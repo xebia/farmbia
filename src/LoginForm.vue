@@ -29,6 +29,8 @@
 </template>
 
 <script>
+import { post } from './http';
+
 export default {
   data() {
     return {
@@ -40,14 +42,9 @@ export default {
   methods: {
     async submit() {
       console.log(this.email, this.password);
-      const res = await fetch('https://my.farm.bot/api/tokens', {
-        method: 'POST',
-        body: JSON.stringify({
-          user: {
-            email: this.email,
-            password: this.password,
-          },
-        }),
+      const res = await post('/login', {
+        email: this.email,
+        password: this.password,
       });
       console.log(res);
     },

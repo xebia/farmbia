@@ -1,6 +1,7 @@
 const express = require('express');
 
 const control = require('./control');
+const auth = require('./auth');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app
     );
     next();
   })
+  .post('/login', auth.login)
   .post('/stop', control.stop)
   .post('/unlock', control.unlock)
   .post('/move/:type', control.move)
