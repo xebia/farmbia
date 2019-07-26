@@ -1,7 +1,7 @@
 <template>
   <div>
-    <control-room v-if="loggedIn"></control-room>
-    <login-form></login-form>
+    <control-room v-if="token"></control-room>
+    <login-form v-else @login="login"></login-form>
   </div>
 </template>
 
@@ -14,12 +14,17 @@ export default {
     ControlRoom,
     LoginForm,
   },
-  name: 'App',
   data() {
     return {
-      loggedIn: false,
+      token: undefined,
     };
   },
+  methods: {
+    login(token) {
+      this.token = token;
+    },
+  },
+  name: 'App',
 };
 </script>
 
